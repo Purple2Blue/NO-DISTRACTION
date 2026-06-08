@@ -56,3 +56,33 @@ def unblock_all():
 
     with open(HOSTS_PATH, 'w') as f:
         f.writelines(clean_lines)
+
+def toggle_master(data):
+    data["master_on"] = not data["master_on"]
+    save_json(data, "data.json")
+    if data["master_on"]:
+        block_all(data["sites"])
+    else:
+        unblock_all()
+
+def toggle_site(data, url):
+    for site in data["sites"]:
+        if site["url"] == url:
+            site["enabled"] = not site["enabled"]
+            break
+    save_json(data, "data.json")
+    if data["master_on"]:
+        block_all(data["sites"])
+
+def add_site(data, url):
+    if not any(site["url"] == url for site in data["sites"]):
+        data["sites"].append({"url": url, "enabled": True})
+        save_json(data, "data.json")
+    if data["master_on"]:
+        block_all(data["sites"])
+
+def remove_site(data, url):
+    data["sites"] = [site for site in data["sites"] if site["url"] != url]
+    save_json(data, "data.json")
+    if data["master_on"]:
+        block_all(data["sites"])
