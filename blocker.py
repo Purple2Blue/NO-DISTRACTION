@@ -17,4 +17,14 @@ def save_json(data, file_path):
 
 def block_all(sites):
     with open(HOSTS_PATH, 'r') as f:
-        lines = f.readlines()
+        lines = f.readlines() 
+        clean_lines = []
+        inside_block = False
+
+        for line in lines:
+            if MARKER_START in line:
+                inside_block = True
+            elif MARKER_END in line:
+                inside_block = False
+            elif not inside_block:
+                clean_lines.append(line) 
