@@ -28,3 +28,10 @@ def block_all(sites):
                 inside_block = False
             elif not inside_block:
                 clean_lines.append(line) 
+    
+        block_lines = [MARKER_START + "\n"]
+        for site in sites:
+            if site["enabled"]:
+                block_lines.append(f"127.0.0.1 {site['url']}\n")
+                block_lines.append(f"127.0.0.1 www.{site['url']}\n")
+        block_lines.append(MARKER_END + "\n")
