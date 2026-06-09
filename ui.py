@@ -2,8 +2,6 @@ import requests
 import customtkinter as ctk
 from PIL import Image, ImageTk
 from io import BytesIO
-
-from streamlit import toggle
 from blocker import load_json
 
 favicon_cache = {} 
@@ -16,7 +14,7 @@ def get_favicon(url):
         response = requests.get(favicon_url, timeout=5)
         response.raise_for_status()
         image = Image.open(BytesIO(response.content))
-        photo = ImageTk.PhotoImage(image)
+        photo = ctk.CTkImage(image, size=(32, 32))
         favicon_cache[url] = photo  # store it
         return photo
     except Exception as e:
@@ -55,7 +53,7 @@ class App(ctk.CTk):
             row_frame = ctk.CTkFrame(master=self.scroll_frame, fg_color="transparent")
             row_frame.grid(row=index, column=0, padx=10, pady=5, sticky="ew")
             
-            row_frame.columnconfigure(0, weight=1) 
+            row_frame.columnconfigure(1, weight=1) 
 
             icon = get_favicon(site["url"])
             favicon_label = ctk.CTkLabel(master=row_frame, text="", image=icon)
@@ -63,9 +61,6 @@ class App(ctk.CTk):
 
             site_label = ctk.CTkLabel(master=row_frame, text=site["url"])
             site_label.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-
-            user_label = ctk.CTkLabel(master=row_frame, text=site.get("username", ""))
-            user_label.grid(row=0, column=1, padx=10, pady=5, sticky="w")
 
             toggle = ctk.CTkSwitch(master=row_frame, text="")
             toggle.grid(row=0, column=2, padx=5, pady=5)
