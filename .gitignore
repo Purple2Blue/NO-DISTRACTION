@@ -1,4 +1,7 @@
-Shit.md
+idea.md
 __pycache__
 tempCodeRunnerFile.py
-data.json
+*.json
+dist
+build
+*.spec

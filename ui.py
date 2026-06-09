@@ -1,4 +1,6 @@
 import requests
+import os
+import sys
 import customtkinter as ctk
 from PIL import Image, ImageTk, ImageDraw
 from io import BytesIO
@@ -7,6 +9,11 @@ import pystray
 import threading
 
 favicon_cache = {} 
+
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 def get_favicon(url):
     if url in favicon_cache:
@@ -29,8 +36,9 @@ ctk.set_default_color_theme("blue")
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.data = blocker.load_json("data.json")
+        self.data = blocker.load_json()
         self.title("Focus Mode")
+        self.iconbitmap(resource_path("assets/icon.ico"))
         self.geometry("500x700")
         self.top_frame = ctk.CTkFrame(self)
         self.top_frame.pack(fill="x", padx=20, pady=20)
@@ -77,11 +85,9 @@ class App(ctk.CTk):
             delete_btn = ctk.CTkButton(master=row_frame, text="X", width=30, fg_color="red", 
                                        command=lambda u=site["url"]: self.delete_site(u))
             delete_btn.grid(row=0, column=3, padx=5, pady=5)
-    def setup_tray(self):
-        image = Image.new("RGB", (64, 64), color=(30, 30, 30))
-        draw = ImageDraw.Draw(image)
-        draw.ellipse([16, 16, 48, 48], fill=(0, 120, 255))
 
+    def setup_tray(self):
+        image = Image.open(resource_path("assets/icon.ico"))
         menu = pystray.Menu(
             pystray.MenuItem("Show", self.show_window),
             pystray.MenuItem("Exit", self.exit_app)
