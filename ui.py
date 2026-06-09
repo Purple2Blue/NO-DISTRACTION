@@ -2,9 +2,7 @@ import requests
 import customtkinter as ctk
 from PIL import Image, ImageTk
 from io import BytesIO
-
-from streamlit import toggle
-from blocker import load_json, remove_site, toggle_site, add_site
+import blocker
 
 favicon_cache = {} 
 
@@ -29,7 +27,7 @@ ctk.set_default_color_theme("blue")
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.data = load_json("data.json")
+        self.data = blocker.load_json("data.json")
         self.title("Focus Mode")
         self.geometry("500x700")
         self.top_frame = ctk.CTkFrame(self)
@@ -74,17 +72,25 @@ class App(ctk.CTk):
                                        command=lambda u=site["url"]: self.delete_site(u))
             delete_btn.grid(row=0, column=3, padx=5, pady=5)
     def toggle_focus_mode(self):
-        pass
+        blocker.toggle_master(self.data)
+        if self.data["master_on"]:
+            self.top_switch.select()
+        else:
+            self.top_switch.deselect()
 
     def add_site(self):
-        pass
+        url = self.site_entry.get().strip()
+        if url:
+            blocker.add_site(self.data, url)
+            self.site_entry.delete(0, "end") 
+            self.refresh()
     
     def toggle_site(self, url):
-        toggle_site(self.data, url)
+        blocker.toggle_site(self.data, url)
         self.refresh()
 
     def delete_site(self, url):
-        remove_site(self.data, url)
+        blocker.remove_site(self.data, url)
         self.refresh()
 
     def refresh(self):

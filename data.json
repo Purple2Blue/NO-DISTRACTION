@@ -11,6 +11,10 @@
     {
       "url": "instagram.com",
       "enabled": true
+    },
+    {
+      "url": "pornhub.com",
+      "enabled": false
     }
   ],
   "master_on": false
