@@ -3,5 +3,6 @@ __pycache__
 tempCodeRunnerFile.py
 *.json
 dist
+assets/stitch.html
 build
 *.spec
