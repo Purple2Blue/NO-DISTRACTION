@@ -19,7 +19,7 @@ def main():
         </body>
     </html>
     """
-
+    app_url = "http://localhost:5173"
     # 3. Create the window
     window = webview.create_window(
         title='Focus Mode',
