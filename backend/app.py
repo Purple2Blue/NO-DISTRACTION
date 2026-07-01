@@ -66,6 +66,8 @@ class FocusModeApp:
         self.is_quitting = False
 
     def create_window(self):
+        # Added text_select=False and easy_drag=False to secure the UI,
+        # preventing users from highlighting text or revealing underlying web mechanics.
         self.window = webview.create_window(
             title="Focus Mode",
             url=get_frontend_path(),
@@ -74,6 +76,8 @@ class FocusModeApp:
             height=780,
             resizable=True,
             min_size=(460, 620),
+            text_select=False,
+            easy_drag=False
         )
         self.window.events.closing += self.on_window_closing
 
@@ -142,7 +146,8 @@ def main():
     app.create_window()
     app.create_tray_icon()
 
-    # debug=True allows you to open Chromium DevTools by right-clicking the window.
+    # Explicitly forced debug=False to completely disable Chromium DevTools,
+    # ensuring right-clicking the window won't bring up the inspection panels.
     webview.start(debug=False, icon=get_icon_path())
 
 
