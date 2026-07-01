@@ -143,7 +143,7 @@ def main():
     app.create_tray_icon()
 
     # debug=True allows you to open Chromium DevTools by right-clicking the window.
-    webview.start(debug=True, icon=get_icon_path())
+    webview.start(debug=False, icon=get_icon_path())
 
 
 if __name__ == "__main__":
