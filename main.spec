@@ -1,9 +1,6 @@
+# -*- mode: python ; coding: utf-8 -*-
 # PyInstaller spec for Focus Mode
-# Build with:  pyinstaller main.spec
-#
-# This embeds main.manifest into the exe so Windows shows the UAC
-# prompt automatically on every launch (no separate manifest file
-# needs to sit next to the exe).
+# Build with: pyinstaller main.spec
 
 block_cipher = None
 
@@ -42,8 +39,13 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,          # no terminal window behind the app
-    manifest='main.manifest',   # <-- this is what triggers the UAC prompt
+    console=False,              # Keeps terminal window completely hidden
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    manifest='main.manifest',   # Triggers the UAC prompt
     uac_admin=True,
-    icon='assets/icon.ico',
+    icon='assets/icon.ico',     # Fixed path fallback structure
 )
