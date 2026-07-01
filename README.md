@@ -2,132 +2,190 @@
 
 <img src="assets/icon.ico" width="80" height="80" alt="Focus Mode Icon"/>
 
-# Focus Mode
+# Focus Mode 2.0
 
-**A no-bullshit distraction blocker for Windows.**  
+**A clean, system-level distraction blocker for Windows.**  
 Block websites at the OS level. Stay locked in.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?style=flat-square&logo=windows&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![UI](https://img.shields.io/badge/UI-pywebview-111827?style=flat-square)
+![Version](https://img.shields.io/badge/Version-2.0-aec6ff?style=flat-square)
 
 ---
 
 </div>
 
-## What it does
+## What It Does
 
-Focus Mode blocks distracting websites directly through your system's hosts file — no browser extension needed, works across Chrome, Edge, Brave, and every other browser on your PC.
+Focus Mode 2.0 blocks distracting websites through your Windows `hosts` file. No browser extension, no account, no cloud sync. It works across Chrome, Edge, Brave, Firefox, and any browser that respects normal system DNS resolution.
 
-Turn it on. Get to work.
+Turn it on. Get back to work.
 
 ---
 
 ## Features
 
-- **Master toggle** — one switch blocks everything instantly
-- **Per-site control** — unblock individual sites while keeping others blocked
-- **9 preloaded sites** — YouTube, Instagram, Twitter, Netflix, Reddit, Facebook, Prime Video, Hotstar, Snapchat
-- **Custom sites** — add any domain to your blocklist
-- **Favicon support** — clean UI with real site icons
-- **System tray** — runs quietly in the background, minimize instead of close
-- **Auto DNS flush** — changes take effect immediately
-- **Safe exit** — unblocks everything cleanly when you close the app
+- **Master toggle** - one switch enables blocking for the full website list
+- **Per-site control** - turn off individual sites while Focus Mode stays active
+- **Preloaded distractions** - YouTube, Instagram, Twitter, Facebook, Reddit, Netflix, Prime Video, Hotstar, and Snapchat
+- **Custom sites** - add any domain to your blocklist
+- **Persistent JSON state** - saves your list in `%APPDATA%\FocusMode\data.json`
+- **Real favicons** - each site gets a clean visual identity in the UI
+- **Resizable desktop window** - no fixed-size app block
+- **System tray support** - close hides the window to tray
+- **Safe close behavior** - Focus Mode turns off before the app hides or quits
+- **Automatic DNS flush** - applies hosts-file changes immediately
+- **UAC-ready exe config** - PyInstaller manifest requests Administrator access
 
 ---
 
-## How it works
+## How It Works
 
-When focus mode is ON, Focus Mode writes blocked domains to your Windows hosts file:
+When Focus Mode is ON, the app writes enabled domains to your Windows hosts file:
 
-```
+```text
 127.0.0.1 youtube.com
 127.0.0.1 www.youtube.com
 ```
 
-When turned OFF, it removes those entries and flushes the DNS cache. Your data is stored in `AppData/Roaming/FocusMode/data.json` — your blocklist persists across sessions.
+When Focus Mode is OFF, it removes its own block section from the hosts file and flushes DNS.
+
+The app only edits the section between its own markers:
+
+```text
+# BLOCKER_START
+...
+# BLOCKER_END
+```
+
+Your saved state lives here:
+
+```text
+%APPDATA%\FocusMode\data.json
+```
 
 ---
 
 ## Installation
 
-### Option A — Run from source
+### Option A - Run From Source
 
 **1. Clone the repo**
+
 ```bash
-git clone https://github.com/Satyam-madeit/NO-DISTRACTIONS.git
-cd NO-DISTRACTIONS
+git clone https://github.com/Satyam-madeit/focusmode.git
+cd focusmode
 ```
 
 **2. Install dependencies**
+
 ```bash
-pip install customtkinter pillow requests pystray
+pip install pywebview pystray pillow pyinstaller
 ```
 
-**3. Run as administrator**
+**3. Run as Administrator**
+
 ```powershell
-Start-Process python -ArgumentList "main.py" -Verb RunAs
+python -m backend.app
 ```
 
-> ⚠️ Admin privileges are required to edit the hosts file.
+For real blocking, start your terminal as Administrator before running the command.
+
+> Admin privileges are required because Windows protects the hosts file.
 
 ---
 
-### Option B — Download the .exe
+### Option B - Build The EXE
 
-Download `main.exe` from [Releases](https://github.com/Satyam-madeit/NO-DISTRACTIONS/releases) and double click. UAC will prompt for admin access automatically.
+The executable is not included yet. Build it locally with:
+
+```powershell
+pyinstaller main.spec
+```
+
+The generated app will be placed in:
+
+```text
+dist/
+```
+
+`main.manifest` is included in the build config, so the packaged app should request Administrator access automatically through UAC.
 
 ---
 
 ## Usage
 
-| Action | What happens |
+| Action | What Happens |
 |---|---|
-| Toggle **Enable Focus Mode** ON | All sites blocked, DNS flushed |
-| Toggle individual site OFF | That site unblocked while others stay blocked |
-| Add custom site | Type domain (e.g. `twitch.tv`) and hit Add |
-| Remove site | Hit the red X next to any site |
-| Minimize window | App goes to system tray |
-| Exit from tray | Unblocks all sites and closes cleanly |
+| Turn master ON | Every website in the list turns on and gets blocked |
+| Turn master OFF | Every website turns off and the hosts file is cleaned |
+| Toggle one site OFF | That site is unblocked while the rest stay blocked |
+| Add a site | The domain is saved and added to the UI |
+| Remove a site | The domain is removed from JSON and hosts rules |
+| Close the window | Focus Mode turns off, then the app hides to tray |
+| Open from tray | The window returns and refreshes from saved state |
+| Quit from tray | Focus Mode turns off and the app exits cleanly |
 
-> After toggling, restart your browser for changes to take effect.
+> Some browsers keep their own DNS cache. Restart your browser if a change does not appear immediately.
 
 ---
 
 ## Project Structure
 
-```
-NO-DISTRACTIONS/
-├── main.py          # Entry point + admin check
-├── ui.py            # CustomTkinter GUI
-├── blocker.py       # Hosts file + DNS logic
+```text
+focusmode/
 ├── assets/
-│   └── icon.ico     # App icon
-└── data.json        # Auto-generated blocklist (AppData)
+│   └── icon.ico
+├── backend/
+│   ├── app.py          # pywebview shell, tray behavior, window lifecycle
+│   ├── api.py          # frontend/backend bridge
+│   └── core/
+│       ├── blocker.py  # hosts-file editing and DNS flush
+│       └── storage.py  # JSON persistence
+├── frontend/
+│   ├── index.html      # desktop UI
+│   ├── app.js          # UI behavior and pywebview calls
+│   └── favicon.ico
+├── main.manifest       # UAC/admin request for packaged exe
+└── main.spec           # PyInstaller build config
 ```
 
 ---
 
 ## Stack
 
-- [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter) — modern UI
-- [pystray](https://github.com/moses-palmer/pystray) — system tray
-- [Pillow](https://python-pillow.org/) — image handling
-- [Requests](https://requests.readthedocs.io/) — favicon fetching
+- **Python** - backend logic and app orchestration
+- **pywebview** - native desktop window with HTML/CSS/JS UI
+- **pystray** - Windows system tray integration
+- **Pillow** - tray icon loading
+- **PyInstaller** - Windows executable build
+- **Tailwind CDN** - frontend styling during development
 
 ---
 
 ## Limitations
 
 - Windows only
-- Requires administrator privileges
-- Chrome's built-in DNS cache may delay blocking by a few seconds — restart your browser after toggling
-- Does not block apps (only browser-based access)
+- Requires Administrator privileges for real blocking
+- Blocks browser/domain access, not native apps directly
+- Browser DNS caches may delay changes until restart
+- Tailwind is currently loaded from CDN, so the source UI expects internet access during development
+
+---
+
+## Roadmap Ideas
+
+- Local Tailwind build instead of CDN
+- Schedule-based focus sessions
+- Import/export blocklists
+- Search and categories for large site lists
+- Signed installer/release build
 
 ---
 
 <div align="center">
 
-Built by [Satyam](https://github.com/Satyam-madeit) — because YouTube wasn't going to block itself.
+Built by [Satyam](https://github.com/Satyam-madeit) - because YouTube was not going to block itself.
 
 </div>

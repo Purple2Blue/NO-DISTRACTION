@@ -1,8 +1,54 @@
-idea.md
-__pycache__
-tempCodeRunnerFile.py
-*.json
-dist
-assets/stitch.html
-build
-*.spec
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# PyInstaller
+build/
+dist/
+*.egg-info/
+
+# Local app/runtime data
+*.log
+logs/
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node/frontend scratch files, if tooling is added later
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test and coverage output
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Keep source assets tracked, but ignore generated archives/installers
+*.zip
+*.7z
+*.msi
+*.exe
