@@ -250,6 +250,41 @@ function renderState(state) {
     updateCount();
 }
 
+// ---------- Update Banner ----------
+function showUpdateBanner(version) {
+    const banner = document.getElementById('update-banner');
+    const versionText = document.getElementById('update-version-text');
+    versionText.textContent = `v${version}`;
+    banner.classList.add('visible');
+}
+
+function dismissUpdateBanner() {
+    const banner = document.getElementById('update-banner');
+    banner.classList.remove('visible');
+}
+
+async function startUpdate() {
+    const btn = document.getElementById('update-now-btn');
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+    showToast('Downloading update... Focus Mode will restart shortly.', 'success');
+
+    try {
+        const result = await pywebview.api.start_update();
+        if (result && !result.success) {
+            showToast(result.error || 'Update failed', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Update Now';
+        }
+        // on success the app closes and relaunches itself, no further UI needed
+    } catch (err) {
+        console.error(err);
+        showToast('Something went wrong', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Update Now';
+    }
+}
+
 // ---------- Initial Load ----------
 async function initApp() {
     try {
