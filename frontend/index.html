@@ -155,6 +155,19 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
+        /* Update Banner */
+        #update-banner {
+            display: none;
+        }
+        #update-banner.visible {
+            display: flex;
+            animation: updateBannerIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes updateBannerIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
     </style>
 <script id="tailwind-config">
         tailwind.config = {
@@ -266,6 +279,20 @@
 </header>
 <!-- Scrollable Content Area -->
 <div class="z-10 flex-1 overflow-y-auto custom-scrollbar px-lg py-lg space-y-xl">
+<!-- Update Banner -->
+<section class="items-center justify-between gap-md bg-tertiary-container/15 border border-tertiary-container/40 rounded-2xl px-lg py-md" id="update-banner">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-tertiary text-[22px]" data-icon="system_update">system_update</span>
+<div class="flex flex-col">
+<p class="font-body-md text-on-surface font-medium">Update available — <span id="update-version-text">v2.1.0</span></p>
+<p class="text-[12px] text-on-surface-variant/70">Restarts the app to install.</p>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="h-9 px-md rounded-xl text-[13px] font-medium text-on-surface-variant hover:bg-white/5 transition-colors" onclick="dismissUpdateBanner()">Later</button>
+<button class="h-9 px-lg rounded-xl bg-tertiary-container text-white text-[13px] font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all" id="update-now-btn" onclick="startUpdate()">Update Now</button>
+</div>
+</section>
 <!-- Hero Card: Master Toggle -->
 <section class="hero-card state-transition bg-surface-bright border border-primary/30 rounded-2xl p-[28px] flex items-center justify-between" id="master-card">
 <div class="flex flex-col gap-sm">
@@ -301,7 +328,7 @@
             </button>
 </div>
 <div class="mt-lg flex justify-center items-center text-[11px] text-on-surface-variant/40 font-label-caps tracking-[0.2em] opacity-80">
-<span>FOCUS MODE 2.0</span>
+<span>FOCUS MODE 2.0.0</span>
 </div>
 </footer>
 </main>

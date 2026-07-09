@@ -4,6 +4,7 @@ class FocusApi:
     def __init__(self):
         # Load state into memory when the API initializes
         self.data = storage.load_data()
+        self.on_update_requested = None  # set by app.py at startup
 
     def _save_and_return(self):
         storage.save_data(self.data)
@@ -88,3 +89,9 @@ class FocusApi:
 
         self.data["sites"] = updated_sites
         return self._save_and_return()
+
+    def start_update(self):
+        """Called from the frontend's 'Update Now' button."""
+        if self.on_update_requested is None:
+            return {"success": False, "error": "Updater not initialized"}
+        return self.on_update_requested()
