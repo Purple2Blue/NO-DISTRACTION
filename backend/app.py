@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import ctypes
+import threading
 
 import pystray
 import webview
@@ -12,6 +13,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.api import FocusApi
+from updater import check_for_update, download_and_apply_update
 
 
 def get_base_path():
@@ -64,6 +66,7 @@ class FocusModeApp:
         self.window = None
         self.tray_icon = None
         self.is_quitting = False
+        self._pending_update_url = None
 
     def create_window(self):
         # Added text_select=False and easy_drag=False to secure the UI,
@@ -85,6 +88,7 @@ class FocusModeApp:
         image = Image.open(get_icon_path())
         menu = pystray.Menu(
             pystray.MenuItem("Open Focus Mode", self.show_window, default=True),
+            pystray.MenuItem("Check for Updates", self.on_check_for_updates_clicked),
             pystray.MenuItem("Quit", self.quit_app),
         )
         self.tray_icon = pystray.Icon("FocusMode", image, "Focus Mode", menu)
@@ -136,6 +140,77 @@ class FocusModeApp:
         if self.window:
             self.window.destroy()
 
+    # ------------------------------------------------------------------
+    # Auto-update
+    # ------------------------------------------------------------------
+
+    def check_for_updates_on_startup(self):
+        """Silent, non-blocking check. Only notifies — doesn't auto-download,
+        so the user isn't surprised by a restart they didn't ask for."""
+        def _worker():
+            latest_version, download_url = check_for_update()
+            if latest_version:
+                self._pending_update_url = download_url
+                if self.tray_icon:
+                    self.tray_icon.notify(
+                        f"Focus Mode {latest_version} is available. "
+                        f"Click 'Check for Updates' in the tray menu to install.",
+                        title="Update available",
+                    )
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def on_check_for_updates_clicked(self, icon=None, item=None):
+        """Manual check from the tray menu. This one does download + install,
+        since clicking it is explicit user intent."""
+        def _worker():
+            # reuse a pending url from the startup check if we already found one,
+            # otherwise check again in case the user hasn't restarted since then
+            download_url = self._pending_update_url
+            latest_version = None
+            if not download_url:
+                latest_version, download_url = check_for_update()
+
+            if not download_url:
+                if self.tray_icon:
+                    self.tray_icon.notify(
+                        "You're already on the latest version.", title="Focus Mode"
+                    )
+                return
+
+            if self.tray_icon:
+                self.tray_icon.notify(
+                    "Downloading update... Focus Mode will restart shortly.",
+                    title="Focus Mode",
+                )
+            self._shutdown_and_apply_update(download_url)
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def _shutdown_and_apply_update(self, download_url):
+        """Cleanly turns off hosts-file blocking and tears down the window/tray
+        before swapping the exe, so we never leave the hosts file modified
+        mid-update."""
+        self.is_quitting = True
+        result = self.api.turn_off_focus_mode()
+        if not result["success"]:
+            # don't proceed with the update if we can't safely clean up
+            self.is_quitting = False
+            if self.tray_icon:
+                self.tray_icon.notify(
+                    "Couldn't safely close Focus Mode for the update. "
+                    "Please run as Administrator and try again.",
+                    title="Update failed",
+                )
+            return
+
+        if self.window:
+            self.window.destroy()
+        if self.tray_icon:
+            self.tray_icon.stop()
+
+        exe_name = os.path.basename(sys.executable)
+        download_and_apply_update(download_url, exe_name=exe_name)
+
 
 def main():
     if not is_running_as_admin():
@@ -145,6 +220,7 @@ def main():
     app = FocusModeApp()
     app.create_window()
     app.create_tray_icon()
+    app.check_for_updates_on_startup()
 
     # Explicitly forced debug=False to completely disable Chromium DevTools,
     # ensuring right-clicking the window won't bring up the inspection panels.
