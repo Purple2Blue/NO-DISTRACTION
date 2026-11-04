@@ -186,6 +186,6 @@ focusmode/
 
 <div align="center">
 
-Built by [Satyam](https://github.com/Satyam-madeit) - because YouTube was not going to block itself.
+Built by [Satyam Srivastava](https://github.com/Satyam-madeit) - because YouTube was not going to block itself.
 
 </div>
